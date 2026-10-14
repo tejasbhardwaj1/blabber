@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>Blabber</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.tejas.blabber</string>
+    <key>CFBundleName</key>
+    <string>Blabber</string>
+    <key>CFBundleDisplayName</key>
+    <string>Blabber</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleIconFile</key>
+    <string>Blabber</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>26.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Blabber needs microphone access to transcribe your speech while you hold the push-to-talk key.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Blabber uses on-device speech recognition to turn your voice into text. Audio never leaves your Mac.</string>
+</dict>
+</plist>

@@ -1,20 +1,58 @@
 import SwiftUI
 
-/// Phase B placeholder for the Settings scene (Cmd+,). Replaced in
-/// Phase D by the hotkey recorder and model/language/asset-status
-/// controls described in the brief — nothing invented ahead of that.
+/// Settings scene (Cmd+,). Shows only what exists today: the push-to-talk
+/// shortcut and the on-device speech model.
 struct SettingsView: View {
+    let appDelegate: AppDelegate
+
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            Text("Settings")
-                .font(DesignTokens.Typography.headline)
-                .foregroundStyle(DesignTokens.Color.textPrimary)
-            Text("Hotkey and model settings land here in Phase D.")
-                .font(DesignTokens.Typography.body)
-                .foregroundStyle(DesignTokens.Color.textSecondary)
+        Form {
+            Section("Dictation Shortcut") {
+                LabeledContent("Push-to-talk") {
+                    ShortcutBadge(keys: ["⌘"], caption: "Right")
+                }
+                Text("Hold the key anywhere to dictate. This shortcut is fixed in this version.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Speech Model") {
+                let info = appDelegate.model.modelInfo
+                LabeledContent("Model", value: info?.name ?? "—")
+                LabeledContent("Language", value: info?.language ?? "—")
+                LabeledContent("Status", value: info?.status ?? "—")
+            }
         }
-        .padding(DesignTokens.Spacing.xl)
-        .frame(width: 420, height: 200)
-        .background(DesignTokens.Color.bgCanvas)
+        .formStyle(.grouped)
+        .frame(width: 440)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// A read-only shortcut field styled like the standard macOS shortcut
+/// recorder. It displays the current (fixed) binding; it does not capture
+/// a new one, because rebinding would require changing the hotkey tap.
+private struct ShortcutBadge: View {
+    let keys: [String]
+    let caption: String
+
+    var body: some View {
+        HStack(spacing: DesignTokens.Spacing.xs) {
+            ForEach(keys, id: \.self) { key in
+                Text(key)
+                    .font(.body)
+                    .frame(minWidth: 22, minHeight: 22)
+                    .padding(.horizontal, DesignTokens.Spacing.xs)
+                    .background(
+                        RoundedRectangle(cornerRadius: DesignTokens.Radius.small)
+                            .fill(.quaternary)
+                    )
+            }
+            Text(caption)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Push-to-talk shortcut: Right Command")
     }
 }

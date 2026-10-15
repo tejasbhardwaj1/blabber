@@ -1,36 +1,55 @@
 import SwiftUI
 
-/// Phase B placeholder for the main window. Replaced in Phase D by the
-/// real layout: history (searchable, with per-row copy), the live VU
-/// meter, start/stop, and the Dictionary.
+/// The main window: a standard `NavigationSplitView` with a two-item
+/// sidebar (History, Dictionary).
 struct ContentView: View {
     let appDelegate: AppDelegate
 
     @Environment(\.openWindow) private var openWindow
+    @State private var selection: SidebarItem = .history
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.md) {
-            Text("Blabber")
-                .font(DesignTokens.Typography.title)
-                .foregroundStyle(DesignTokens.Color.textPrimary)
-            Text("Hold Right ⌘ anywhere to dictate.")
-                .font(DesignTokens.Typography.body)
-                .foregroundStyle(DesignTokens.Color.textSecondary)
-            Text("History, the level meter, and the Dictionary land here in Phase D.")
-                .font(DesignTokens.Typography.caption)
-                .foregroundStyle(DesignTokens.Color.textSecondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 360)
+        NavigationSplitView {
+            List(SidebarItem.allCases, selection: $selection) { item in
+                Label(item.title, systemImage: item.symbol)
+                    .tag(item)
+            }
+            .navigationSplitViewColumnWidth(min: 180, ideal: 200, max: 260)
+            .navigationTitle("Blabber")
+        } detail: {
+            switch selection {
+            case .history:
+                HistoryView(model: appDelegate.model)
+            case .dictionary:
+                DictionaryView()
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(DesignTokens.Color.bgCanvas)
         .onAppear {
-            // Routes the menu bar's "Open Blabber" item through SwiftUI's
-            // own window-opening machinery, so it reliably recreates the
-            // window even after the user has fully closed it — not just
-            // a `makeKeyAndOrderFront` on a window that may no longer
-            // exist.
+            // Route the menu bar's "Open Blabber" item through SwiftUI's
+            // own window machinery, so it reliably recreates the window
+            // even after it's been fully closed.
             appDelegate.openMainWindowAction = { openWindow(id: "main") }
+        }
+    }
+}
+
+enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
+    case history
+    case dictionary
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .history: return "History"
+        case .dictionary: return "Dictionary"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .history: return "waveform"
+        case .dictionary: return "character.book.closed"
         }
     }
 }

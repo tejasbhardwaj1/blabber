@@ -24,6 +24,12 @@ public final class AudioCapture {
     private var isRecording = false
     private var onBuffer: ((AVAudioPCMBuffer) -> Void)?
 
+    /// Read-only metering tap. Called on the audio thread with a 0...1
+    /// level derived from each buffer while recording, for the live UI
+    /// meter. Purely observational: it reads sample values and never
+    /// mutates the buffer or the capture/conversion path.
+    public var onLevel: ((Float) -> Void)?
+
     /// Rolling pre-roll so the leading consonant of an utterance isn't
     /// lost to tap/engine startup latency.
     private var preRoll: [AVAudioPCMBuffer] = []
@@ -83,9 +89,30 @@ public final class AudioCapture {
 
         if isRecording {
             onBuffer?(converted)
+            onLevel?(meterLevel(from: raw))
         } else {
             appendPreRoll(converted)
         }
+    }
+
+    /// RMS level of the raw buffer, mapped from roughly -50…0 dBFS to
+    /// 0...1 for display. Read-only: iterates sample values, writes
+    /// nothing.
+    private func meterLevel(from buffer: AVAudioPCMBuffer) -> Float {
+        guard let channelData = buffer.floatChannelData else { return 0 }
+        let frameCount = Int(buffer.frameLength)
+        guard frameCount > 0 else { return 0 }
+
+        let samples = channelData[0]
+        var sumSquares: Float = 0
+        for i in 0..<frameCount {
+            let sample = samples[i]
+            sumSquares += sample * sample
+        }
+        let rms = sqrtf(sumSquares / Float(frameCount))
+        let db = 20 * log10f(max(rms, 1e-7))
+        let clamped = max(-50, min(0, db))
+        return (clamped + 50) / 50
     }
 
     private func appendPreRoll(_ buffer: AVAudioPCMBuffer) {
